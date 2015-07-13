@@ -121,7 +121,8 @@ static NSUInteger kHeaderHeight = 44;
                         }
                     } else {
                         TWPhoto *firstPhoto = self.assets[0];
-                        if(self.photoCollectiondelegate) {
+                        if(self.photoCollectiondelegate && [ self.photoCollectiondelegate shouldSelectFirstPhoto ] )
+                        {
                             NSIndexPath *pathToSelect = [NSIndexPath indexPathForRow:0+extraActions.count inSection:0];
                             self.selectedIndexPath = pathToSelect;
                             [self.photoCollectiondelegate didSelectPhoto:firstPhoto.originalImage atAssetURL:[firstPhoto.asset valueForProperty:ALAssetPropertyAssetURL] andDropDraw:NO];
@@ -129,7 +130,8 @@ static NSUInteger kHeaderHeight = 44;
                     }
                 } else {
                     TWPhoto *firstPhoto = self.assets[0];
-                    if(self.photoCollectiondelegate) {
+                    if(self.photoCollectiondelegate  && [ self.photoCollectiondelegate shouldSelectFirstPhoto ] )
+                    {
                         NSIndexPath *pathToSelect = [NSIndexPath indexPathForRow:0+extraActions.count inSection:0];
                         self.selectedIndexPath = pathToSelect;
                         [self.photoCollectiondelegate didSelectPhoto:firstPhoto.originalImage atAssetURL:[firstPhoto.asset valueForProperty:ALAssetPropertyAssetURL] andDropDraw:NO];
