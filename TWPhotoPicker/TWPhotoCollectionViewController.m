@@ -83,8 +83,8 @@ static NSUInteger kHeaderHeight = 44;
     }
     
     if(self.selectedAssetGroup == nil || [number intValue] == groupAll) {
-        if(self.collectionView.contentSize.height+ kHeaderHeight > CGRectGetHeight(self.collectionView.frame))
-            [self.collectionView setContentOffset:CGPointMake(0.0f, kHeaderHeight) animated:NO];
+        if(self.collectionView.contentSize.height+ [ self getHeaderHeight ] > CGRectGetHeight(self.collectionView.frame))
+            [self.collectionView setContentOffset:CGPointMake(0.0f, [ self getHeaderHeight ]) animated:NO];
     }
 }
 
@@ -253,14 +253,19 @@ static NSUInteger kHeaderHeight = 44;
 #pragma mark - Collection View Delegate
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
 
+    CGSize size = CGSizeMake(collectionView.frame.size.width, [ self getHeaderHeight ] );
+
+    return size;
+}
+
+-(CGFloat) getHeaderHeight
+{
     CGFloat theHeight = 0;
     if( [ self.photoCollectiondelegate shouldIncludeAlbumSelection ] )
     {
         theHeight = kHeaderHeight;
     }
-    CGSize size = CGSizeMake(collectionView.frame.size.width, theHeight );
-
-    return size;
+    return theHeight;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
