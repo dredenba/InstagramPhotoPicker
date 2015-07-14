@@ -16,6 +16,7 @@
 -(void) didClickBackButton;
 -(BOOL) shouldSelectFirstPhoto;
 -(BOOL) shouldSizeToFillSuperview;
+-(BOOL) shouldIncludeAlbumSelection;
 @optional
 -(NSArray*) extraActions;
 

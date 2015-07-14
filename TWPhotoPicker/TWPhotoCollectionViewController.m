@@ -205,14 +205,21 @@ static NSUInteger kHeaderHeight = 44;
 }
 
 #pragma mark - Collection View Data Source
-- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
-    
-    TWPhotoCollectionReusableView *reusableview = [collectionView
-                                              dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kPhotoCollectionReusableView forIndexPath:indexPath];
-    
-    [reusableview.leftButton addTarget:self action:@selector(backButtonClicked) forControlEvents:UIControlEventTouchUpInside];
-    reusableview.titleLabel.text = self.selectedAssetGroup? [[self.selectedAssetGroup albumName] uppercaseString] : [@"All photos" uppercaseString];
-    return reusableview;
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+    if( [ self.photoCollectiondelegate shouldIncludeAlbumSelection ] )
+    {
+        TWPhotoCollectionReusableView *reusableview = [collectionView
+                dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kPhotoCollectionReusableView forIndexPath:indexPath];
+
+        [reusableview.leftButton addTarget:self action:@selector(backButtonClicked) forControlEvents:UIControlEventTouchUpInside];
+        reusableview.titleLabel.text = self.selectedAssetGroup? [[self.selectedAssetGroup albumName] uppercaseString] : [@"All photos" uppercaseString];
+        return reusableview;
+    }
+    else
+    {
+        return nil;
+    }
 }
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
@@ -246,7 +253,12 @@ static NSUInteger kHeaderHeight = 44;
 #pragma mark - Collection View Delegate
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
 
-    CGSize size = CGSizeMake(collectionView.frame.size.width, kHeaderHeight);
+    CGFloat theHeight = 0;
+    if( [ self.photoCollectiondelegate shouldIncludeAlbumSelection ] )
+    {
+        theHeight = kHeaderHeight;
+    }
+    CGSize size = CGSizeMake(collectionView.frame.size.width, theHeight );
 
     return size;
 }
