@@ -15,6 +15,7 @@
 -(void) didSelectPhoto:(UIImage*) photo atAssetURL:(NSURL*) assetURL andDropDraw:(BOOL) dropDraw;
 -(void) didClickBackButton;
 -(BOOL) shouldSelectFirstPhoto;
+-(BOOL) shouldSizeToFillSuperview;
 @optional
 -(NSArray*) extraActions;
 

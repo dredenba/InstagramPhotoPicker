@@ -64,7 +64,11 @@ static NSUInteger kHeaderHeight = 44;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    self.view.frame = self.view.superview.bounds;
+    if( [ self.photoCollectiondelegate shouldSizeToFillSuperview ] )
+    {
+        self.view.frame = self.view.superview.bounds;
+    }
+
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 }
 
