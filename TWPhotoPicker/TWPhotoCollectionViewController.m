@@ -9,6 +9,7 @@
 #import "TWPhotoCollectionViewController.h"
 #import "TWPhotoCollectionViewCell.h"
 #import "TWPhotoCollectionReusableView.h"
+#import "TWProgressFooter.h"
 #import "TWAssetAction.h"
 #import "TWPhotoLoader.h"
 
