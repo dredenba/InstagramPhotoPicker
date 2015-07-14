@@ -14,9 +14,10 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.myActivityIndicator = [ [ UIActivityIndicatorView alloc ] initWithActivityIndicatorStyle: UIActivityIndicatorViewStyleGray ];
+        [ self.myActivityIndicator startAnimating ];
         [self addSubview:self.myActivityIndicator];
     }
-    
+
     return self;
 }
 
