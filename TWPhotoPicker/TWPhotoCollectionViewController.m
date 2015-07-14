@@ -71,7 +71,7 @@ static NSUInteger kHeaderHeight = 44;
     [super viewWillDisappear:animated];
     [[[TWPhotoLoader sharedLoader] allPhotos] removeAllObjects];
     [self.collectionView reloadData];
-    
+
 }
 
 - (void)viewDidLayoutSubviews {
@@ -86,14 +86,14 @@ static NSUInteger kHeaderHeight = 44;
 
 - (void)loadData {
     [self loadPhotos];
-    
+
     NSNumber *number = nil;
     int groupAll = 16;
-    
+
     if(self.selectedAssetGroup) {
         number = self.selectedAssetGroup.groupType;
     }
-    
+
     if(self.selectedAssetGroup == nil || [number intValue] == groupAll) {
         if(self.collectionView.contentSize.height+ [ self getHeaderHeight ] > CGRectGetHeight(self.collectionView.frame))
             [self.collectionView setContentOffset:CGPointMake(0.0f, [ self getHeaderHeight ]) animated:NO];
@@ -113,21 +113,21 @@ static NSUInteger kHeaderHeight = 44;
             self.assets = [NSMutableArray arrayWithArray:photos];
 
             NSArray *extraActions = [NSArray array];
-            
+
             if(self.photoCollectiondelegate && [self.photoCollectiondelegate respondsToSelector:@selector(extraActions)]) {
                 extraActions =[extraActions arrayByAddingObjectsFromArray:[self.photoCollectiondelegate extraActions]];
             }
-            
+
             if (self.assets.count) {
                 if(self.imagePreselectURL) {
-                    
+
                     NSUInteger foundIndex = [self.assets indexOfObjectPassingTest:^BOOL(TWPhoto *obj, NSUInteger idx, BOOL *stop) {
                         NSURL *assetURL = [obj.asset valueForProperty:ALAssetPropertyAssetURL];
 
                         return [assetURL.absoluteString isEqualToString:self.imagePreselectURL.absoluteString];
-                        
+
                     }];
-                    
+
                     if(foundIndex != NSNotFound) {
                         TWPhoto *asset = ((TWPhoto*)self.assets[foundIndex]);
                         if(self.photoCollectiondelegate  && [ self.photoCollectiondelegate shouldSelectFirstPhoto ] ) {
@@ -154,11 +154,11 @@ static NSUInteger kHeaderHeight = 44;
                     }
                 }
             }
-            
+
             if(extraActions.count) {
                 [self loadExtraActions:extraActions];
             }
-            
+
             self.imagePreselectURL = nil;
             [self.collectionView reloadData];
             if(self.selectedIndexPath) {
@@ -167,15 +167,15 @@ static NSUInteger kHeaderHeight = 44;
         } else {
             NSLog(@"Load Photos Error: %@", error);
         }
-        
+
     };
-    
+
     if(self.selectedAssetGroup) {
         [TWPhotoLoader loadAllPhotosInGroup:self.selectedAssetGroup.albumURL andCompletion:photoBlock];
     } else {
         [TWPhotoLoader loadAllPhotos:photoBlock];
     }
-    
+
 }
 
 - (void)loadExtraActions:(NSArray*) additionalAssets {
@@ -206,7 +206,7 @@ static NSUInteger kHeaderHeight = 44;
 
 #pragma mark - UIScrollViewDelegate
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
-    
+
     if(self.scrollListeners) {
         for(id<UIScrollViewDelegate> observer in self.scrollListeners) {
             if (observer) {
@@ -253,14 +253,14 @@ static NSUInteger kHeaderHeight = 44;
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     TWPhotoCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kPhotoCollectionViewCellIdentifier forIndexPath:indexPath];
-    
+
     if([self.assets[(NSUInteger) indexPath.row] isKindOfClass:[TWAssetAction class]]) {
         TWAssetAction *action = ((TWAssetAction*)self.assets[(NSUInteger) indexPath.row]);
         cell.imageView.image = action.thumbnail? action.thumbnail : action.assetImage;
     } else {
         cell.imageView.image = [self.assets[(NSUInteger) indexPath.row] thumbnailImage];
     }
-    
+
     if([self.selectedIndexPath isEqual:indexPath]) {
         [cell setSelected:YES];
     } else {
@@ -275,6 +275,18 @@ static NSUInteger kHeaderHeight = 44;
     CGSize size = CGSizeMake(collectionView.frame.size.width, [ self getHeaderHeight ] );
 
     return size;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionView*)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
+{
+    if (self.assets.count > 0 ) {
+        return  CGSizeZero;
+    }
+    else
+    {
+        CGSize theSize = CGSizeMake(collectionView.frame.size.width, kHeaderHeight );
+        return theSize;
+    }
 }
 
 -(CGFloat) getHeaderHeight
@@ -294,20 +306,20 @@ static NSUInteger kHeaderHeight = 44;
 
     NSIndexPath *oldIndexPath = self.selectedIndexPath;
     self.selectedIndexPath = indexPath;
-    
+
     if(oldIndexPath) {
         [self.collectionView reloadItemsAtIndexPaths:@[self.selectedIndexPath, oldIndexPath]];
     } else {
         [self.collectionView reloadItemsAtIndexPaths:@[self.selectedIndexPath]];
     }
-    
+
     if([self.assets[(NSUInteger) indexPath.row] isKindOfClass:[TWAssetAction class]]) {
         TWAssetAction *action = self.assets[(NSUInteger) indexPath.row];
-        
+
         /**
-         If these is a block defined we use it.
-         otherwise we display the original asset image.
-         */
+        If these is a block defined we use it.
+        otherwise we display the original asset image.
+        */
         if(action.simpleBlock) {
             action.simpleBlock();
         } else {
