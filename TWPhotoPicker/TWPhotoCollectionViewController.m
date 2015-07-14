@@ -46,9 +46,20 @@ static NSUInteger kHeaderHeight = 44;
     self.collectionView.delaysContentTouches = NO;
     // Register cell classes
     [self.collectionView registerClass:[TWPhotoCollectionViewCell class] forCellWithReuseIdentifier:kPhotoCollectionViewCellIdentifier];
-    [self.collectionView registerClass:[TWPhotoCollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kPhotoCollectionReusableView];
+    [self.collectionView registerClass: [ self getHeaderClass ] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kPhotoCollectionReusableView];
+    [self.collectionView registerClass: [ self getFooterClass ] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier: [[ self getFooterClass ] description ] ];
 
     // Do any additional setup after loading the view.
+}
+
+-(Class) getHeaderClass
+{
+    return [ TWPhotoCollectionReusableView class ];
+}
+
+-(Class) getFooterClass
+{
+    return [ TWProgressFooter class ];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -118,7 +129,7 @@ static NSUInteger kHeaderHeight = 44;
                     
                     if(foundIndex != NSNotFound) {
                         TWPhoto *asset = ((TWPhoto*)self.assets[foundIndex]);
-                        if(self.photoCollectiondelegate) {
+                        if(self.photoCollectiondelegate  && [ self.photoCollectiondelegate shouldSelectFirstPhoto ] ) {
                             NSIndexPath *pathToSelect = [NSIndexPath indexPathForRow:(foundIndex + extraActions.count) inSection:0];
                             self.selectedIndexPath = pathToSelect;
                             [self.photoCollectiondelegate didSelectPhoto:asset.originalImage atAssetURL:[asset.asset valueForProperty:ALAssetPropertyAssetURL] andDropDraw:NO];
@@ -207,7 +218,7 @@ static NSUInteger kHeaderHeight = 44;
 #pragma mark - Collection View Data Source
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-    if( [ self.photoCollectiondelegate shouldIncludeAlbumSelection ] )
+    if( [ self.photoCollectiondelegate shouldIncludeAlbumSelection ] && [UICollectionElementKindSectionHeader isEqualToString: kind ] )
     {
         TWPhotoCollectionReusableView *reusableview = [collectionView
                 dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kPhotoCollectionReusableView forIndexPath:indexPath];
@@ -215,6 +226,13 @@ static NSUInteger kHeaderHeight = 44;
         [reusableview.leftButton addTarget:self action:@selector(backButtonClicked) forControlEvents:UIControlEventTouchUpInside];
         reusableview.titleLabel.text = self.selectedAssetGroup? [[self.selectedAssetGroup albumName] uppercaseString] : [@"All photos" uppercaseString];
         return reusableview;
+    }
+    else if( [ UICollectionElementKindSectionFooter isEqualToString: kind ] )
+    {
+        return [collectionView
+                dequeueReusableSupplementaryViewOfKind: UICollectionElementKindSectionFooter
+                                   withReuseIdentifier: [[self getFooterClass] description ]
+                                          forIndexPath: indexPath ];
     }
     else
     {
