@@ -328,12 +328,21 @@ static NSUInteger kHeaderHeight = 44;
             }
         }
     } else {
-        TWPhoto * asset = self.assets[(NSUInteger) indexPath.row];
-        UIImage *image = asset.originalImage;
-        if(self.photoCollectiondelegate) {
-            [self.photoCollectiondelegate didSelectPhoto:image atAssetURL:[asset.asset valueForProperty:ALAssetPropertyAssetURL] andDropDraw:YES];
-        }
+        [ self sendAssetPhotoToDelegate: indexPath ];
     }
+}
+
+-(void) sendAssetPhotoToDelegate: (NSIndexPath*) anIndexPath
+{
+    TWPhoto * asset = self.assets[(NSUInteger) anIndexPath.row];
+    dispatch_async( dispatch_get_main_queue(), ^
+    {
+        UIImage *image = asset.originalImage;
+        if( self.photoCollectiondelegate )
+        {
+            [ self.photoCollectiondelegate didSelectPhoto: image atAssetURL: [ asset.asset valueForProperty: ALAssetPropertyAssetURL ] andDropDraw: YES];
+        }
+    } );
 }
 
 @end
