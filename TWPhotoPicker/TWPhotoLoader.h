@@ -13,6 +13,8 @@ typedef void (^loadBlock)(NSArray *photos, NSError *error);
 @interface TWPhotoLoader : NSObject
 
 @property (strong, nonatomic) NSMutableArray *allPhotos;
+@property NSInteger maxNumberOfPhotosToLoad;
+@property BOOL shouldSortNewestToOldest;
 
 + (TWPhotoLoader *)sharedLoader;
 

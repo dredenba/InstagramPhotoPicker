@@ -8,6 +8,8 @@
 
 #import "TWPhotoLoader.h"
 
+NSInteger UNLIMITED_NUMBER_OF_PHOTOS = -1;
+
 @interface TWPhotoLoader ()
 @property (strong, nonatomic) ALAssetsLibrary *assetsLibrary;
 @property (readwrite, copy, nonatomic) void(^loadBlock)(NSArray *photos, NSError *error);
@@ -25,6 +27,19 @@
     });
     return loader;
 }
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self)
+    {
+        _maxNumberOfPhotosToLoad = UNLIMITED_NUMBER_OF_PHOTOS;
+        _shouldSortNewestToOldest = YES;
+    }
+
+    return self;
+}
+
 
 + (void)loadAllPhotosInGroup:(NSURL*) groupURL andCompletion:(void (^)(NSArray *photos, NSError *error))completion {
     [[TWPhotoLoader sharedLoader] setLoadBlock:completion];
@@ -45,15 +60,10 @@
             [group setAssetsFilter:onlyPhotosFilter];
             
             ALAssetsGroupEnumerationResultsBlock assetsEnumerationBlock = ^(ALAsset *result, NSUInteger index, BOOL *stop) {
-                if (result) {
-                    TWPhoto *photo = [TWPhoto new];
-                    photo.asset = result;
-                    [self.allPhotos insertObject:photo atIndex:0];
-                }
-        
+                [self addPhotoToSet:result stop:stop];
             };
-        
-            [group enumerateAssetsUsingBlock:assetsEnumerationBlock];
+
+            [group enumerateAssetsWithOptions: [self getEnumerateOptions ] usingBlock: assetsEnumerationBlock];
         
             self.loadBlock(self.allPhotos, nil);
         } else {
@@ -65,16 +75,35 @@
     }];
 }
 
+- (NSEnumerationOptions)getEnumerateOptions
+{
+    return (NSEnumerationOptions) (self.shouldSortNewestToOldest? NSEnumerationReverse : 0);
+}
+
+- (void)addPhotoToSet:(ALAsset *)result stop:(BOOL *)stop
+{
+    if (result) {
+                    TWPhoto *photo = [TWPhoto new];
+                    photo.asset = result;
+                    [self.allPhotos addObject:photo];
+
+                    if([self hasMaxNumberOfPhotos])
+                    {
+                        *stop = YES;
+                    }
+                }
+}
+
+- (BOOL)hasMaxNumberOfPhotos
+{
+    return self.maxNumberOfPhotosToLoad != UNLIMITED_NUMBER_OF_PHOTOS && [self.allPhotos count] >= self.maxNumberOfPhotosToLoad;
+}
+
 - (void)startLoading {
     [self.allPhotos removeAllObjects];
     
     ALAssetsGroupEnumerationResultsBlock assetsEnumerationBlock = ^(ALAsset *result, NSUInteger index, BOOL *stop) {
-        if (result) {
-            TWPhoto *photo = [TWPhoto new];
-            photo.asset = result;
-            [self.allPhotos insertObject:photo atIndex:0];
-        }
-        
+        [self addPhotoToSet:result stop:stop];
     };
     
     ALAssetsLibraryGroupsEnumerationResultsBlock listGroupBlock = ^(ALAssetsGroup *group, BOOL *stop) {
@@ -83,7 +112,7 @@
         
         if ([group numberOfAssets] > 0) {
             if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos) {
-                [group enumerateAssetsUsingBlock:assetsEnumerationBlock];
+                [group enumerateAssetsWithOptions: [self getEnumerateOptions ] usingBlock: assetsEnumerationBlock];
             }
         }
         
